@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lista de Mercado — Editable</title>
+  <style>
+    :root{
+      --bg:#f7f8fb; --card:#ffffff; --accent:#2563eb; --muted:#6b7280;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+    }
+    html,body{height:100%;margin:0;background:var(--bg);color:#0f172a}
+    .wrap{max-width:960px;margin:18px auto;padding:16px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    h1{font-size:20px;margin:0}
+    p.sub{margin:0;color:var(--muted);font-size:13px}
+    .actions{display:flex;gap:8px}
+    button{background:var(--accent);color:white;border:0;padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer}
+    button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(37,99,235,0.14)}
+    main{margin-top:14px}
+    .category{background:var(--card);padding:12px;border-radius:12px;margin-bottom:10px;box-shadow:0 6px 18px rgba(16,24,40,0.06)}
+    .cat-title{display:flex;align-items:center;justify-content:space-between}
+    .cat-title h2{font-size:14px;margin:0}
+    ul{list-style:none;padding:0;margin:10px 0 0 0}
+    li{display:flex;align-items:center;gap:10px;padding:8px 6px;border-top:1px solid #f0f2f5}
+    li:first-child{border-top:0}
+    input[type=checkbox]{width:20px;height:20px}
+    span[item]{flex:1;min-width:0}
+    span[item][contenteditable]:focus{outline:2px solid rgba(37,99,235,0.12);border-radius:6px;padding:2px 4px;background:#f0f9ff}
+    li.done{opacity:0.6;text-decoration:line-through}
+    .controls{display:flex;gap:8px;align-items:center}
+    .small{font-size:12px;color:var(--muted)}
+    footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
+    @media (max-width:560px){header{flex-direction:column;align-items:flex-start} .actions{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>🛒 Lista de Mercado — Editable</h1>
+        <p class="sub">Toca para editar, marca para tachar. Se guarda localmente en tu teléfono.</p>
+      </div>
+      <div class="actions">
+        <button id="download">Descargar HTML</button>
+        <button id="share" class="ghost">Compartir (copiar link)</button>
+        <button id="reset" class="ghost">Resetear</button>
+      </div>
+    </header>
+
+    <main id="checklist">
+      <!-- Panadería y Desayuno -->
+      <section class="category" data-key="panaderia">
+        <div class="cat-title"><h2>Panadería y Desayuno</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">Pan Tajado</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Arepas Chocolo</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Pancakes</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Cereal</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Galletas Miel</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Saltinas</span></li>
+        </ul>
+      </section>
+
+      <!-- Lácteos y Derivados -->
+      <section class="category" data-key="lacteos">
+        <div class="cat-title"><h2>Lácteos y Derivados</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">Leche Bolsa</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Yogurt</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Yogurt Griego</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Quezo Mozarella Lonchas</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Crema de leche</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Mantequilla</span></li>
+        </ul>
+      </section>
+
+      <!-- Carnes, Embutidos y Enlatados -->
+      <section class="category" data-key="carnes">
+        <div class="cat-title"><h2>Carnes, Embutidos y Enlatados</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">Jamon Lonchas</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Salchicha Premium</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Atuncito x2</span></li>
+        </ul>
+      </section>
+
+      <!-- Bebidas y Dulces -->
+      <section class="category" data-key="bebidas">
+        <div class="cat-title"><h2>Bebidas y Dulces</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">Panela</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Cafe Quindio</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Cafe Instantaneo</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Chocolate</span></li>
+        </ul>
+      </section>
+
+      <!-- Condimentos y Salsas -->
+      <section class="category" data-key="condimentos">
+        <div class="cat-title"><h2>Condimentos y Salsas</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">Salsa de tomate</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Mayonesa</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Salsa BBQ</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Adobo</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Sazona Rey</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Color</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Canela Astillas</span></li>
+        </ul>
+      </section>
+
+      <!-- Granos, Cereales y Harinas -->
+      <section class="category" data-key="granos">
+        <div class="cat-title"><h2>Granos, Cereales y Harinas</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">Arroz 2.5 KG</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Garbanzos</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Papas Fritar</span></li>
+        </ul>
+      </section>
+
+      <!-- Tortillas y Complementos -->
+      <section class="category" data-key="tortillas">
+        <div class="cat-title"><h2>Tortillas y Complementos</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">Tortillas Hierbas</span></li>
+        </ul>
+      </section>
+
+      <!-- Varios Comestibles -->
+      <section class="category" data-key="varios">
+        <div class="cat-title"><h2>Varios comestibles</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">Pancakes</span></li>
+        </ul>
+      </section>
+
+      <!-- Aseo Personal -->
+      <section class="category" data-key="aseo-personal">
+        <div class="cat-title"><h2>Aseo Personal</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">Crema para peinar Pantene</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Repuesto Maquina Afeitar</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Pañitos Humedos</span></li>
+        </ul>
+      </section>
+
+      <!-- Aseo del Hogar -->
+      <section class="category" data-key="aseo-hogar">
+        <div class="cat-title"><h2>Aseo del Hogar</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">Papel Higienico *12 Premium</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Toalla Cocina</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Servilletas</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Jabon Loza</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Jabon Ropa</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Fabuloso Alternativa Cloro</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Vinagre Limpieza</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Pato Tiras</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Limpiapisos ceramica</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Esponja de Alambre</span></li>
+        </ul>
+      </section>
+
+      <!-- Ambientadores y Hogar -->
+      <section class="category" data-key="ambientadores">
+        <div class="cat-title"><h2>Ambientadores y Hogar</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">BonAire Respuesto</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Ambientador Varitas</span></li>
+        </ul>
+      </section>
+
+      <!-- Otros -->
+      <section class="category" data-key="otros">
+        <div class="cat-title"><h2>Otros</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">Pilas AA</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Pomitos</span></li>
+        </ul>
+      </section>
+
+      <!-- Mascotas -->
+      <section class="category" data-key="mascotas">
+        <div class="cat-title"><h2>Mascotas</h2></div>
+        <ul>
+          <li><input type="checkbox"><span item contenteditable="true">Arena Gatos</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Snack Sobre Cats</span></li>
+          <li><input type="checkbox"><span item contenteditable="true">Galletas Gatos</span></li>
+        </ul>
+      </section>
+
+    </main>
+
+    <footer>
+      <div class="small">Toca cualquier ítem para editarlo. Los cambios se guardan automáticamente en tu teléfono (localStorage).</div>
+    </footer>
+  </div>
+
+  <script>
+    // Storage key (cámbialo si quieres tener múltiples listas)
+    const STORAGE_KEY = 'lista_mercado_completa_v1';
+    const checklist = document.getElementById('checklist');
+    const downloadBtn = document.getElementById('download');
+    const resetBtn = document.getElementById('reset');
+    const shareBtn = document.getElementById('share');
+
+    // Restore saved HTML (safe since saved by this app only)
+    function restore() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return;
+        // Only replace inner of main to preserve handlers
+        document.getElementById('checklist').outerHTML = saved;
+        attachBehavior(); // reattach events to new DOM
+      } catch (e) {
+        console.warn('Error restoring lista:', e);
+      }
+    }
+
+    // Save current checklist markup to storage
+    function save() {
+      try {
+        // save the <main id="checklist"> ... </main> full markup
+        const main = document.getElementById('checklist').outerHTML;
+        localStorage.setItem(STORAGE_KEY, main);
+      } catch (e) {
+        console.warn('No se pudo guardar', e);
+      }
+    }
+
+    // Attach events: checkbox changes and contenteditable input
+    function attachBehavior() {
+      document.querySelectorAll('#checklist input[type="checkbox"]').forEach(chk => {
+        // set initial visual state
+        chk.parentElement.classList.toggle('done', chk.checked);
+        chk.onchange = () => {
+          chk.parentElement.classList.toggle('done', chk.checked);
+          save();
+        };
+      });
+
+      document.querySelectorAll('#checklist [contenteditable="true"]').forEach(el => {
+        el.oninput = save;
+        // allow Enter to insert newline (not submit)
+        el.addEventListener('keydown', e => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            document.execCommand('insertHTML', false, '\n');
+            save();
+          }
+        });
+      });
+    }
+
+    // Download the current full page as HTML
+    downloadBtn.addEventListener('click', () => {
+      save(); // ensure latest
+      const doctype = '<!doctype html>\n';
+      const html = document.documentElement.outerHTML;
+      const blob = new Blob([doctype + html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'lista-de-mercado-editable.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // Copy current page URL (handy on Vercel) - note: doesn't include state (state is localStorage)
+    shareBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        alert('Link copiado. Pásalo a tu mami 💅');
+      } catch (e) {
+        prompt('Copia manualmente este link:', location.href);
+      }
+    });
+
+    // Reset to original (removes saved localStorage and reloads original shipped HTML)
+    resetBtn.addEventListener('click', () => {
+      if (confirm('¿Resetear la lista a su estado original y eliminar los cambios guardados?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      }
+    });
+
+    // Init
+    attachBehavior();
+    restore();
+  </script>
+</body>
+</html>
