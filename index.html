@@ -1,296 +1,382 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Lista de Mercado — Editable</title>
+  <title>Listas de Mercado</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root{
-      --bg:#f7f8fb; --card:#ffffff; --accent:#2563eb; --muted:#6b7280;
-      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
-    }
-    html,body{height:100%;margin:0;background:var(--bg);color:#0f172a}
-    .wrap{max-width:960px;margin:18px auto;padding:16px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    h1{font-size:20px;margin:0}
-    p.sub{margin:0;color:var(--muted);font-size:13px}
-    .actions{display:flex;gap:8px}
-    button{background:var(--accent);color:white;border:0;padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer}
-    button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(37,99,235,0.14)}
-    main{margin-top:14px}
-    .category{background:var(--card);padding:12px;border-radius:12px;margin-bottom:10px;box-shadow:0 6px 18px rgba(16,24,40,0.06)}
-    .cat-title{display:flex;align-items:center;justify-content:space-between}
-    .cat-title h2{font-size:14px;margin:0}
-    ul{list-style:none;padding:0;margin:10px 0 0 0}
-    li{display:flex;align-items:center;gap:10px;padding:8px 6px;border-top:1px solid #f0f2f5}
-    li:first-child{border-top:0}
-    input[type=checkbox]{width:20px;height:20px}
-    span[item]{flex:1;min-width:0}
-    span[item][contenteditable]:focus{outline:2px solid rgba(37,99,235,0.12);border-radius:6px;padding:2px 4px;background:#f0f9ff}
-    li.done{opacity:0.6;text-decoration:line-through}
-    .controls{display:flex;gap:8px;align-items:center}
-    .small{font-size:12px;color:var(--muted)}
-    footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
-    @media (max-width:560px){header{flex-direction:column;align-items:flex-start} .actions{width:100%}}
+    :root{--accent:#2563eb;--danger:#ef4444;--card:#ffffff;}
+    body{font-family:Inter, system-ui, Arial;padding:18px;max-width:980px;margin:0 auto;background:#f6f7fb;color:#111}
+    h1{margin:0 0 12px}
+    .card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(16,24,40,0.04);margin-bottom:12px}
+    .row{display:flex;gap:8px;align-items:center}
+    input[type="text"], input[type="number"]{padding:8px;border-radius:8px;border:1px solid #e5e7eb}
+    button{background:var(--accent);color:white;border:0;padding:8px 12px;border-radius:8px;cursor:pointer}
+    button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(37,99,235,0.12)}
+    button.danger{background:var(--danger)}
+    .lists-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+    .list-card{padding:10px;border-radius:8px;background:#fff;border:1px solid #ececec}
+    .items-wrap{margin-top:12px}
+    .item{display:flex;gap:8px;align-items:center;padding:8px;border-radius:8px;border:1px solid #f0f0f2;margin-bottom:8px;background:#fff}
+    .item input[type="text"]{width:200px}
+    .item input[type="number"]{width:100px}
+    .small{font-size:13px;color:#6b7280}
+    .total{font-weight:700;margin-top:10px}
+    .hidden{display:none}
+    .muted{color:#6b7280;font-size:13px}
+    @media (max-width:640px){ .row{flex-direction:column;align-items:stretch} .item input[type="text"]{width:120px} }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>🛒 Lista de Mercado — Editable</h1>
-        <p class="sub">Toca para editar, marca para tachar. Se guarda localmente en tu teléfono.</p>
-      </div>
-      <div class="actions">
-        <button id="download">Descargar HTML</button>
-        <button id="share" class="ghost">Compartir (copiar link)</button>
-        <button id="reset" class="ghost">Resetear</button>
-      </div>
-    </header>
+  <h1>🛒 Listas de Mercado</h1>
 
-    <main id="checklist">
-      <!-- Panadería y Desayuno -->
-      <section class="category" data-key="panaderia">
-        <div class="cat-title"><h2>Panadería y Desayuno</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">Pan Tajado</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Arepas Chocolo</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Pancakes</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Cereal</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Galletas Miel</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Saltinas</span></li>
-        </ul>
-      </section>
-
-      <!-- Lácteos y Derivados -->
-      <section class="category" data-key="lacteos">
-        <div class="cat-title"><h2>Lácteos y Derivados</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">Leche Bolsa</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Yogurt</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Yogurt Griego</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Quezo Mozarella Lonchas</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Crema de leche</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Mantequilla</span></li>
-        </ul>
-      </section>
-
-      <!-- Carnes, Embutidos y Enlatados -->
-      <section class="category" data-key="carnes">
-        <div class="cat-title"><h2>Carnes, Embutidos y Enlatados</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">Jamon Lonchas</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Salchicha Premium</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Atuncito x2</span></li>
-        </ul>
-      </section>
-
-      <!-- Bebidas y Dulces -->
-      <section class="category" data-key="bebidas">
-        <div class="cat-title"><h2>Bebidas y Dulces</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">Panela</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Cafe Quindio</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Cafe Instantaneo</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Chocolate</span></li>
-        </ul>
-      </section>
-
-      <!-- Condimentos y Salsas -->
-      <section class="category" data-key="condimentos">
-        <div class="cat-title"><h2>Condimentos y Salsas</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">Salsa de tomate</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Mayonesa</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Salsa BBQ</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Adobo</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Sazona Rey</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Color</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Canela Astillas</span></li>
-        </ul>
-      </section>
-
-      <!-- Granos, Cereales y Harinas -->
-      <section class="category" data-key="granos">
-        <div class="cat-title"><h2>Granos, Cereales y Harinas</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">Arroz 2.5 KG</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Garbanzos</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Papas Fritar</span></li>
-        </ul>
-      </section>
-
-      <!-- Tortillas y Complementos -->
-      <section class="category" data-key="tortillas">
-        <div class="cat-title"><h2>Tortillas y Complementos</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">Tortillas Hierbas</span></li>
-        </ul>
-      </section>
-
-      <!-- Varios Comestibles -->
-      <section class="category" data-key="varios">
-        <div class="cat-title"><h2>Varios comestibles</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">Pancakes</span></li>
-        </ul>
-      </section>
-
-      <!-- Aseo Personal -->
-      <section class="category" data-key="aseo-personal">
-        <div class="cat-title"><h2>Aseo Personal</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">Crema para peinar Pantene</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Repuesto Maquina Afeitar</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Pañitos Humedos</span></li>
-        </ul>
-      </section>
-
-      <!-- Aseo del Hogar -->
-      <section class="category" data-key="aseo-hogar">
-        <div class="cat-title"><h2>Aseo del Hogar</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">Papel Higienico *12 Premium</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Toalla Cocina</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Servilletas</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Jabon Loza</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Jabon Ropa</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Fabuloso Alternativa Cloro</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Vinagre Limpieza</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Pato Tiras</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Limpiapisos ceramica</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Esponja de Alambre</span></li>
-        </ul>
-      </section>
-
-      <!-- Ambientadores y Hogar -->
-      <section class="category" data-key="ambientadores">
-        <div class="cat-title"><h2>Ambientadores y Hogar</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">BonAire Respuesto</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Ambientador Varitas</span></li>
-        </ul>
-      </section>
-
-      <!-- Otros -->
-      <section class="category" data-key="otros">
-        <div class="cat-title"><h2>Otros</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">Pilas AA</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Pomitos</span></li>
-        </ul>
-      </section>
-
-      <!-- Mascotas -->
-      <section class="category" data-key="mascotas">
-        <div class="cat-title"><h2>Mascotas</h2></div>
-        <ul>
-          <li><input type="checkbox"><span item contenteditable="true">Arena Gatos</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Snack Sobre Cats</span></li>
-          <li><input type="checkbox"><span item contenteditable="true">Galletas Gatos</span></li>
-        </ul>
-      </section>
-
-    </main>
-
-    <footer>
-      <div class="small">Toca cualquier ítem para editarlo. Los cambios se guardan automáticamente en tu teléfono (localStorage).</div>
-    </footer>
+  <div class="card" id="createCard">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <input id="newListName" type="text" placeholder="Nombre de lista (Ej: Noviembre 2)">
+      <button id="btnCreateList">➕ Crear lista</button>
+      <button id="btnReload" class="ghost">🔄 Recargar</button>
+    </div>
+    <div class="muted" style="margin-top:8px">Crea listas por mes/quincena y comparte el link con quien quieras.</div>
   </div>
 
-  <script>
-    // Storage key (cámbialo si quieres tener múltiples listas)
-    const STORAGE_KEY = 'lista_mercado_completa_v1';
-    const checklist = document.getElementById('checklist');
-    const downloadBtn = document.getElementById('download');
-    const resetBtn = document.getElementById('reset');
-    const shareBtn = document.getElementById('share');
+  <div class="card">
+    <h2 style="margin-top:0">Listas existentes</h2>
+    <div id="listsContainer" class="lists-list">
+      <!-- tarjetas de listas -->
+    </div>
+  </div>
 
-    // Restore saved HTML (safe since saved by this app only)
-    function restore() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) return;
-        // Only replace inner of main to preserve handlers
-        document.getElementById('checklist').outerHTML = saved;
-        attachBehavior(); // reattach events to new DOM
-      } catch (e) {
-        console.warn('Error restoring lista:', e);
-      }
-    }
+  <div id="listView" class="card hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div>
+        <h2 id="currentListName" style="margin:0"></h2>
+        <div class="small" id="currentListMeta"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="btnBack" class="ghost">← Volver</button>
+        <button id="btnDeleteList" class="danger">Borrar lista</button>
+      </div>
+    </div>
 
-    // Save current checklist markup to storage
-    function save() {
-      try {
-        // save the <main id="checklist"> ... </main> full markup
-        const main = document.getElementById('checklist').outerHTML;
-        localStorage.setItem(STORAGE_KEY, main);
-      } catch (e) {
-        console.warn('No se pudo guardar', e);
-      }
-    }
+    <hr/>
 
-    // Attach events: checkbox changes and contenteditable input
-    function attachBehavior() {
-      document.querySelectorAll('#checklist input[type="checkbox"]').forEach(chk => {
-        // set initial visual state
-        chk.parentElement.classList.toggle('done', chk.checked);
-        chk.onchange = () => {
-          chk.parentElement.classList.toggle('done', chk.checked);
-          save();
-        };
-      });
+    <div class="row" style="margin-bottom:12px">
+      <input id="itemName" type="text" placeholder="Nombre producto">
+      <input id="itemQty" type="number" min="1" placeholder="Cantidad">
+      <input id="itemPrice" type="number" min="0" placeholder="Precio unidad (COP)">
+      <button id="btnAddItem">Añadir</button>
+    </div>
 
-      document.querySelectorAll('#checklist [contenteditable="true"]').forEach(el => {
-        el.oninput = save;
-        // allow Enter to insert newline (not submit)
-        el.addEventListener('keydown', e => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            document.execCommand('insertHTML', false, '\n');
-            save();
-          }
-        });
-      });
-    }
+    <div id="itemsContainer" class="items-wrap">
+      <!-- items -->
+    </div>
 
-    // Download the current full page as HTML
-    downloadBtn.addEventListener('click', () => {
-      save(); // ensure latest
-      const doctype = '<!doctype html>\n';
-      const html = document.documentElement.outerHTML;
-      const blob = new Blob([doctype + html], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'lista-de-mercado-editable.html';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+    <div class="total" id="totalBox">Total: $0.00</div>
+  </div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+/* === CONFIGURA ESTO ===
+   Reemplaza con tu Project URL y anon key (no uses service key en frontend).
+*/
+const SUPABASE_URL = "https://szsluslsijwiwthftqvv.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6c2x1c2xzaWp3aXd0aGZ0cXZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxNzIzMDUsImV4cCI6MjA3ODc0ODMwNX0.dBiYl1TH0yENoBQNbP-67_p0FK3hN2c_w2onwx_1JD0";
+/* ====================== */
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* DOM */
+const listsContainer = document.getElementById('listsContainer');
+const btnCreateList = document.getElementById('btnCreateList');
+const newListName = document.getElementById('newListName');
+const btnReload = document.getElementById('btnReload');
+
+const listView = document.getElementById('listView');
+const currentListName = document.getElementById('currentListName');
+const currentListMeta = document.getElementById('currentListMeta');
+const btnBack = document.getElementById('btnBack');
+const btnDeleteList = document.getElementById('btnDeleteList');
+
+const itemName = document.getElementById('itemName');
+const itemQty = document.getElementById('itemQty');
+const itemPrice = document.getElementById('itemPrice');
+const btnAddItem = document.getElementById('btnAddItem');
+const itemsContainer = document.getElementById('itemsContainer');
+const totalBox = document.getElementById('totalBox');
+
+let currentListId = null;
+
+/* ---------------------------
+   HELPERS
+   --------------------------- */
+function formatMoney(v){
+  if (v == null || v === "") return "$0.00";
+  const n = Number(v);
+  if (isNaN(n)) return "$0.00";
+  return "$" + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+function toNumberOrNull(v){
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return isNaN(n) ? null : n;
+}
+
+/* ---------------------------
+   LOAD & RENDER LISTS
+   --------------------------- */
+async function loadLists(){
+  listsContainer.innerHTML = "Cargando...";
+  const { data, error } = await supabase.from('listas').select('*').order('created_at', { ascending: false });
+  if (error){
+    listsContainer.innerHTML = "Error cargando listas: " + error.message;
+    return;
+  }
+  listsContainer.innerHTML = "";
+  if (!data || data.length === 0){
+    listsContainer.innerHTML = "<div class='small'>No hay listas todavía.</div>";
+    return;
+  }
+
+  data.forEach(l => {
+    const card = document.createElement('div');
+    card.className = 'list-card';
+    const title = document.createElement('div');
+    title.textContent = l.nombre;
+    title.style.fontWeight = '700';
+
+    const meta = document.createElement('div');
+    meta.className = 'small';
+    meta.textContent = new Date(l.created_at).toLocaleString();
+
+    const actions = document.createElement('div');
+    actions.style.marginTop = '8px';
+    actions.style.display = 'flex';
+    actions.style.gap = '8px';
+
+    const openBtn = document.createElement('button');
+    openBtn.textContent = 'Abrir';
+    openBtn.addEventListener('click', () => openList(l.id, l.nombre));
+
+    const dupBtn = document.createElement('button');
+    dupBtn.textContent = 'Duplicar';
+    dupBtn.className = 'ghost';
+    dupBtn.addEventListener('click', () => duplicateList(l.id, l.nombre));
+
+    const delBtn = document.createElement('button');
+    delBtn.textContent = 'Eliminar';
+    delBtn.className = 'danger';
+    delBtn.addEventListener('click', async () => {
+      if(!confirm(`Eliminar lista "${l.nombre}"? Esto borra sus items también.`)) return;
+      await supabase.from('listas').delete().eq('id', l.id);
+      await loadLists();
     });
 
-    // Copy current page URL (handy on Vercel) - note: doesn't include state (state is localStorage)
-    shareBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(location.href);
-        alert('Link copiado. Pásalo a tu mami 💅');
-      } catch (e) {
-        prompt('Copia manualmente este link:', location.href);
-      }
+    actions.appendChild(openBtn);
+    actions.appendChild(dupBtn);
+    actions.appendChild(delBtn);
+
+    card.appendChild(title);
+    card.appendChild(meta);
+    card.appendChild(actions);
+    listsContainer.appendChild(card);
+  });
+}
+
+/* ---------------------------
+   CREATE LIST
+   --------------------------- */
+btnCreateList.addEventListener('click', async () => {
+  const name = newListName.value.trim();
+  if (!name) { alert("Escribe un nombre para la lista"); return; }
+  const res = await supabase.from('listas').insert({ nombre: name }).select().single();
+  if (res.error){ alert("Error creando lista: " + res.error.message); return; }
+  newListName.value = "";
+  await loadLists();
+  // open new list
+  openList(res.data.id, res.data.nombre);
+});
+
+btnReload.addEventListener('click', loadLists);
+
+/* ---------------------------
+   OPEN LIST
+   --------------------------- */
+async function openList(id, nombre){
+  currentListId = id;
+  currentListName.textContent = nombre;
+  currentListMeta.textContent = `ID: ${id}`;
+  listView.classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  await loadItems();
+}
+
+/* BACK */
+btnBack.addEventListener('click', () => {
+  currentListId = null;
+  listView.classList.add('hidden');
+});
+
+/* DELETE LIST */
+btnDeleteList.addEventListener('click', async () => {
+  if (!currentListId) return;
+  if (!confirm("¿Eliminar toda la lista y sus items?")) return;
+  await supabase.from('items').delete().eq('lista_id', currentListId);
+  await supabase.from('listas').delete().eq('id', currentListId);
+  currentListId = null;
+  listView.classList.add('hidden');
+  await loadLists();
+});
+
+/* DUPLICATE LIST */
+async function duplicateList(listId, listName){
+  // create new list with suffix (copy)
+  const newName = listName + " (copia)";
+  const { data: newList } = await supabase.from('listas').insert({ nombre: newName }).select().single();
+  if (!newList) { alert("Error duplicando"); return; }
+
+  // fetch original items
+  const { data: items } = await supabase.from('items').select('*').eq('lista_id', listId);
+  if (items && items.length){
+    const toInsert = items.map(it => ({
+      lista_id: newList.id,
+      nombre: it.nombre,
+      cantidad: it.cantidad,
+      precio: it.precio,
+      completado: false
+    }));
+    await supabase.from('items').insert(toInsert);
+  }
+  await loadLists();
+}
+
+/* ---------------------------
+   LOAD & RENDER ITEMS
+   --------------------------- */
+async function loadItems(){
+  itemsContainer.innerHTML = "Cargando items...";
+  const { data, error } = await supabase.from('items').select('*').eq('lista_id', currentListId).order('id', { ascending: true });
+  if (error){ itemsContainer.innerHTML = "Error: " + error.message; return; }
+  renderItems(data || []);
+}
+
+function renderItems(items){
+  itemsContainer.innerHTML = "";
+  let total = 0;
+  if(!items || items.length === 0){
+    itemsContainer.innerHTML = "<div class='small'>No hay items aún. Añade uno arriba.</div>";
+    totalBox.textContent = "Total: $0.00";
+    return;
+  }
+
+  items.forEach(it => {
+    const row = document.createElement('div');
+    row.className = 'item';
+
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.checked = !!it.completado;
+    chk.addEventListener('change', async () => {
+      await supabase.from('items').update({ completado: chk.checked }).eq('id', it.id);
+      // no reload full list to keep snappy
     });
 
-    // Reset to original (removes saved localStorage and reloads original shipped HTML)
-    resetBtn.addEventListener('click', () => {
-      if (confirm('¿Resetear la lista a su estado original y eliminar los cambios guardados?')) {
-        localStorage.removeItem(STORAGE_KEY);
-        location.reload();
-      }
+    const nameIn = document.createElement('input');
+    nameIn.type = 'text';
+    nameIn.value = it.nombre || '';
+    nameIn.addEventListener('change', async () => {
+      await supabase.from('items').update({ nombre: nameIn.value }).eq('id', it.id);
     });
 
-    // Init
-    attachBehavior();
-    restore();
-  </script>
+    const qtyIn = document.createElement('input');
+    qtyIn.type = 'number';
+    qtyIn.min = 0;
+    qtyIn.value = it.cantidad ?? '';
+    qtyIn.placeholder = 'Cant.';
+    qtyIn.className = 'cantidad';
+    qtyIn.addEventListener('change', async () => {
+      const v = toNumberOrNull(qtyIn.value);
+      await supabase.from('items').update({ cantidad: v }).eq('id', it.id);
+      await loadItems();
+    });
+
+    const priceIn = document.createElement('input');
+    priceIn.type = 'number';
+    priceIn.min = 0;
+    priceIn.value = it.precio ?? '';
+    priceIn.placeholder = 'Precio';
+    priceIn.className = 'precio';
+    priceIn.addEventListener('change', async () => {
+      const v = toNumberOrNull(priceIn.value);
+      await supabase.from('items').update({ precio: v }).eq('id', it.id);
+      await loadItems();
+    });
+
+    const priceLabel = document.createElement('div');
+    priceLabel.className = 'small';
+    priceLabel.style.minWidth = '110px';
+    priceLabel.textContent = it.precio != null ? formatMoney(it.precio) : '';
+
+    // delete
+    const del = document.createElement('button');
+    del.className = 'delete-btn';
+    del.textContent = 'Eliminar';
+    del.addEventListener('click', async () => {
+      if (!confirm('Eliminar este item?')) return;
+      await supabase.from('items').delete().eq('id', it.id);
+      await loadItems();
+    });
+
+    // append in order
+    row.appendChild(chk);
+    row.appendChild(nameIn);
+    row.appendChild(qtyIn);
+    row.appendChild(priceIn);
+    row.appendChild(priceLabel);
+    row.appendChild(del);
+
+    itemsContainer.appendChild(row);
+
+    if (it.cantidad != null && it.precio != null){
+      total += Number(it.cantidad) * Number(it.precio);
+    }
+  });
+
+  totalBox.textContent = "Total: " + formatMoney(total);
+}
+
+/* ---------------------------
+   ADD ITEM
+   --------------------------- */
+btnAddItem.addEventListener('click', async () => {
+  if (!currentListId) return alert('Abre o crea una lista primero');
+  const name = itemName.value.trim();
+  if (!name) return alert('Escribe nombre del producto');
+  const qty = toNumberOrNull(itemQty.value);
+  const price = toNumberOrNull(itemPrice.value);
+
+  await supabase.from('items').insert({
+    lista_id: currentListId,
+    nombre: name,
+    cantidad: qty,
+    precio: price,
+    completado: false
+  });
+
+  itemName.value = '';
+  itemQty.value = '';
+  itemPrice.value = '';
+  await loadItems();
+});
+
+/* ---------------------------
+   INIT
+   --------------------------- */
+loadLists();
+
+/* auto-refresh so different users see updates (simple approach) */
+
+</script>
 </body>
 </html>
